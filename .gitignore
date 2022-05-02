@@ -1,52 +1,59 @@
- 	# Prerequisites
-	*.d
+*.gcno
+memcached
+memcached-debug
+sizes
+testapp
+timedrun
 
-	# Object files
-	*.o
-	*.ko
-	*.obj
-	*.elf
+# Prerequisites
+*.d
 
-	# Linker output
-	*.ilk
-	*.map
-	*.exp
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
 
-	# Precompiled Headers
-	*.gch
-	*.pch
+# Linker output
+*.ilk
+*.map
+*.exp
 
-	# Libraries
-	*.lib
-	*.a
-	*.la
-	*.lo
+# Precompiled Headers
+*.gch
+*.pch
 
-	# Shared objects (inc. Windows DLLs)
-	*.dll
-	*.so
-	*.so.*
-	*.dylib
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
 
-	# Executables
-	*.exe
-	*.out
-	*.app
-	*.i*86
-	*.x86_64
-	*.hex
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
 
-	# Debug files
-	*.dSYM/
-	*.su
-	*.idb
-	*.pdb
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
 
-	# Kernel Module Compile Results
-	*.mod*
-	*.cmd
-	.tmp_versions/
-	modules.order
-	Module.symvers
-	Mkfile.old
-	dkms.conf
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
