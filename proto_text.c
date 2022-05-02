@@ -2061,7 +2061,7 @@ static void process_touch_command(conn *c, token_t *tokens, const size_t ntokens
     }
 }
 
-static void process_arithmetic_command(conn *c, token_t *tokens, const size_t ntokens, const bool incr) {
+static void process_arithmetic_command(conn *c, token_t *tokens, const size_t ntokens, const int opcode) {
     char temp[INCR_MAX_STORAGE_LEN];
     uint64_t delta;
     char *key;
@@ -2084,21 +2084,21 @@ static void process_arithmetic_command(conn *c, token_t *tokens, const size_t nt
         return;
     }
 
-    switch(add_delta(c, key, nkey, incr, delta, temp, NULL)) {
+    switch(add_delta(c, key, nkey, opcode, delta, temp, NULL)) {
     case OK:
         out_string(c, temp);
         break;
     case NON_NUMERIC:
-        out_string(c, "CLIENT_ERROR cannot increment or decrement non-numeric value");
+        out_string(c, "CLIENT_ERROR cannot perform arithmetic operations on non-numeric value");
         break;
     case EOM:
         out_of_memory(c, "SERVER_ERROR out of memory");
         break;
     case DELTA_ITEM_NOT_FOUND:
         pthread_mutex_lock(&c->thread->stats.mutex);
-        if (incr) {
+        if (opcode == 1) {
             c->thread->stats.incr_misses++;
-        } else {
+        } else if (opcode == 0) {
             c->thread->stats.decr_misses++;
         }
         pthread_mutex_unlock(&c->thread->stats.mutex);
@@ -2826,6 +2826,14 @@ void process_command_ascii(conn *c, char *command) {
 
             WANT_TOKENS_OR(ntokens, 3, 4);
             process_memlimit_command(c, tokens, ntokens);
+        } else {
+            out_string(c, "ERROR");
+        }
+    } else if (first == 'm') {
+        if (strcmp(tokens[COMMAND_TOKEN].value, "mult") == 0) {
+
+            WANT_TOKENS_OR(ntokens, 4, 5);
+            process_arithmetic_command(c, tokens, ntokens, 2);
         } else {
             out_string(c, "ERROR");
         }

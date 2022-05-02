@@ -2212,14 +2212,14 @@ item* limited_get_locked(char *key, size_t nkey, conn *c, bool do_update, uint32
  *
  * c     connection requesting the operation
  * it    item to adjust
- * incr  true to increment value, false to decrement
+ * opcode 0: decr; 1: incr; 2: mult
  * delta amount to adjust value by
  * buf   buffer for response string
  *
  * returns a response string to send back to the client.
  */
 enum delta_result_type do_add_delta(conn *c, const char *key, const size_t nkey,
-                                    const bool incr, const int64_t delta,
+                                    const int opcode, const int64_t delta,
                                     char *buf, uint64_t *cas,
                                     const uint32_t hv,
                                     item **it_ret) {
@@ -2256,22 +2256,31 @@ enum delta_result_type do_add_delta(conn *c, const char *key, const size_t nkey,
         return NON_NUMERIC;
     }
 
-    if (incr) {
-        value += delta;
-        MEMCACHED_COMMAND_INCR(c->sfd, ITEM_key(it), it->nkey, value);
-    } else {
+    switch(opcode){
+        case 0:
         if(delta > value) {
             value = 0;
         } else {
             value -= delta;
         }
         MEMCACHED_COMMAND_DECR(c->sfd, ITEM_key(it), it->nkey, value);
+        break;
+
+        case 1:
+        value += delta;
+        MEMCACHED_COMMAND_INCR(c->sfd, ITEM_key(it), it->nkey, value);
+        break;
+
+        case 2:
+        value *= delta;
+        MEMCACHED_COMMAND_MULT(c->sfd, ITEM_key(it), it->nkey, value);
+        break;
     }
 
     pthread_mutex_lock(&c->thread->stats.mutex);
-    if (incr) {
+    if (opcode == 1) {
         c->thread->stats.slab_stats[ITEM_clsid(it)].incr_hits++;
-    } else {
+    } else if (opcode == 0) {
         c->thread->stats.slab_stats[ITEM_clsid(it)].decr_hits++;
     }
     pthread_mutex_unlock(&c->thread->stats.mutex);
